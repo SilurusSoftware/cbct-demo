@@ -202,7 +202,14 @@ async function loadCases() {
 
 const resultEl = document.getElementById("result");
 
+// Let the browser paint before we start work that blocks the main thread.
+const paint = () => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
 async function loadCase(c, resultIdx) {
+  say(`Loading ${c.id} (${c.size_mb} MB)...`);
+  structsEl.innerHTML = `<div style="color:var(--muted)">Loading...</div>`;
+  await paint();
+
   // Which stored result to show: keep the current pick if it still exists.
   const results = c.results || [];
   let idx = resultIdx;
@@ -214,7 +221,6 @@ async function loadCase(c, resultIdx) {
   if (idx >= 0) resultEl.value = String(idx);
   const chosen = idx >= 0 ? results[idx] : null;
 
-  say(`Loading ${c.id} (${c.size_mb} MB)...`);
   const layers = [{
     url: c.volume,
     colormap: "gray",
